@@ -10,6 +10,8 @@ def decode_byte(color):
     return np.argmin(distances)
 
 def decode_frame(image):
+    frame_id = 0
+    frame_id_bytes = 8
     data = []
     for y in range(CY):
         for x in range(CX):
@@ -18,18 +20,23 @@ def decode_frame(image):
             byte = decode_byte(color)
             if byte == 256:
                 break
-            data.append(np.uint8(byte))
-    return data
+            if frame_id_bytes > 0:
+                frame_id <<= 8
+                frame_id |= byte
+                frame_id_bytes -= 1
+            else:
+                data.append(np.uint8(byte))
+    print(f"Decoded frame ID {frame_id}")
+    return (frame_id, data)
 
 # Decodes the file and invokes the callback for each buffer read from the file.
 def decode(filename, callback):
     video = mpy.VideoFileClip(filename)
-    checksum = 0
+    prev_frame_id = -1
     for frame in video.iter_frames():
-        data = decode_frame(np.array(frame))
-        new_checksum = binascii.crc32(bytes(data))
-        if new_checksum != checksum:
-            checksum = new_checksum
+        frame_id, data = decode_frame(np.array(frame))
+        if frame_id != prev_frame_id:
+            prev_frame_id = frame_id
             callback(data)
 
 if len(sys.argv) > 2:

@@ -11,12 +11,15 @@ def read_file_to_bytes(file_path):
 def set_pixel(surface, x, y, color):
     surface[x * DX:(x + 1) * DX, y * DY:(y + 1) * DY] = color
 
-def render_frame(surface, data, offset):
+def render_frame(surface, frame_id, data, offset):
     length = len(data)
     for y in range(CY):
         for x in range(CX):
-            i = offset + CX * y + x
-            if i < length:
+            i = offset + CX * y + x - FRAME_HEADER_LEN
+            if i < 0:
+                b = (frame_id >> (8 * -i)) & 0xFF
+                set_pixel(surface, y, x, BYTE_COLORS[b])
+            elif i < length:
                 b = data[i]
                 assert b < 256
                 set_pixel(surface, y, x, BYTE_COLORS[b])
@@ -26,9 +29,10 @@ def render_frame(surface, data, offset):
 def generate_frames(data):
     length = len(data)
     def gen(t):
-        offset = int(t * FPS) * BYTES_PER_FRAME
+        frame_id = int(t * FPS)
+        offset = frame_id * BYTES_PER_FRAME
         surface = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
-        render_frame(surface, data, offset)
+        render_frame(surface, frame_id, data, offset)
         return surface
     return gen
 
