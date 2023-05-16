@@ -5,7 +5,7 @@ This utility allows for encoding and decoding of arbitrary files as MP4 videos. 
 ## Encoding
 
 ```
-$ tar cvfz out.tgz source_dir/*           # Create an zipped archive.
+$ tar cvfz out.tgz source_dir/*           # Create a zipped archive.
 $ python3 encoder.py out.tgz out.tgz.mp4  # Encode as video.
 # Upload to YouTube or elsewhere.
 ```
