@@ -17,3 +17,9 @@ $ python3 encoder.py out.tgz out.tgz.mp4  # Encode as video.
 $ python3 decoder.py out.tgz.mp4 out-recovered.tgz
 $ tar xzf out-recovered.tgz
 ```
+
+## Issues
+
+1. The utility is too sensitive to frame rate conversion. The solution is to emit frame headers with consecutive IDs. This allows duplicate frames to be ignored when decoding.
+2. Encode the content hash and verify on decode.
+3. Experiment with `constants.py` values to increase efficiency.
