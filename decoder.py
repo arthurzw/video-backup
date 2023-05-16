@@ -2,6 +2,7 @@ from constants import *
 import numpy as np
 import moviepy.editor as mpy
 import sys
+import binascii
 
 def decode_byte(color):
     c = np.array(color)
@@ -23,8 +24,13 @@ def decode_frame(image):
 # Decodes the file and invokes the callback for each buffer read from the file.
 def decode(filename, callback):
     video = mpy.VideoFileClip(filename)
+    checksum = 0
     for frame in video.iter_frames():
-        callback(decode_frame(np.array(frame)))
+        data = decode_frame(np.array(frame))
+        new_checksum = binascii.crc32(bytes(data))
+        if new_checksum != checksum:
+            checksum = new_checksum
+            callback(data)
 
 if len(sys.argv) > 2:
     input = sys.argv[1]
